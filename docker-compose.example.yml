@@ -1,0 +1,71 @@
+# Network Settings
+# ------- --------
+
+# Name: incfile
+# Subnet: 172.19.0.0/16
+# Command: docker network create --driver=bridge --subnet=172.19.1.0/16 incfile
+
+# Project: 172.19.1.0/24. Range: 172.19.2.0 ~ 172.19.2.255
+
+version: '3'
+
+services:
+  app:
+    container_name: incfile_app
+    build:
+      context: ./docker/app
+      dockerfile: Dockerfile
+    working_dir: /var/www
+    volumes:
+      - ./:/var/www
+      - ./docker/app/custom.ini:/usr/local/etc/php/conf.d/custom.ini
+    depends_on:
+      - postgres
+      - beanstalkd
+    environment:
+      - "APP_NAME=${APP_NAME}"
+      - "APP_ENV=${APP_ENV}"
+      - "APP_DEBUG=${APP_DEBUG}"
+      - "APP_KEY=${APP_KEY}"
+      - "DB_CONNECTION=${DB_CONNECTION}"
+      - "DB_HOST=${DB_HOST}"
+      - "DB_PORT=${DB_PORT}"
+      - "DB_DATABASE=${DB_DATABASE}"
+      - "DB_USERNAME=${DB_USERNAME}"
+      - "DB_PASSWORD=${DB_PASSWORD}"
+      - "CACHE_DRIVER=${CACHE_DRIVER}"
+      - "QUEUE_DRIVER=${QUEUE_DRIVER}"
+    networks:
+      incfilenetwork:
+        ipv4_address: 172.19.1.2
+
+  beanstalkd:
+    container_name: incfile_beanstalkd
+    build:
+      context: ./docker/beanstalkd
+      dockerfile: Dockerfile
+    ports:
+      - "11301:11300"
+    networks:
+      incfilenetwork:
+        ipv4_address: 172.19.1.4
+
+  postgres:
+    image: postgres:10.5
+    container_name: incfile_postgres
+    ports:
+      - "5433:5432"
+    environment:
+      POSTGRES_DB: ${DB_DATABASE}
+      POSTGRES_USER: ${DB_USERNAME}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - ./docker/data/postgres:/var/lib/postgresql/data
+    networks:
+      incfilenetwork:
+        ipv4_address: 172.19.1.5
+
+networks:
+  incfilenetwork:
+    external:
+      name: incfile
