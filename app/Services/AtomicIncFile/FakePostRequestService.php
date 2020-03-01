@@ -20,7 +20,7 @@ class FakePostRequestService implements MakeRequest
     {
         $this->guzzleClient = new Client([
             'base_uri' => env('ATOMIC_INC_FILE_DOMAIN'),
-            'timeout' => 2.0
+            'timeout' => 5.0
         ]);
     }
 

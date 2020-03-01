@@ -59,7 +59,8 @@ class FakePostJob implements ShouldQueue
      */
     public function failed(RequestException $requestException)
     {
-        logger('hola');
-        // Send user notification of failure, etc...
+        if (app()->bound('sentry')) {
+            app('sentry')->captureException($requestException);
+        }
     }
 }

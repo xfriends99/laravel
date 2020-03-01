@@ -45,6 +45,6 @@ class AtomicIncFileFakePost extends Command
         $job = (new FakePostJob())->onQueue('atomic-incfile');
         $dispatch = $this->dispatch($job);
 
-        $this->info("The job {$dispatch->id} is being processed");
+        $this->info("The job with ID:{$dispatch->getId()} is being processed");
     }
 }
